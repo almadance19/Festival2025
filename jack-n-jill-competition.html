@@ -60,20 +60,24 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
   <style>
-    .video-container {
+        /* Container for responsive iframe */
+        .video-container {
       position: relative;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      padding-bottom: 56.25%; /* 16:9 aspect ratio (height/width * 100) */
       height: 0;
       overflow: hidden;
       max-width: 100%;
       background: #000;
     }
+
+    /* Make the iframe responsive */
     .video-container iframe {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      border: 0;
     }
     .carousel img {
       width: 400px; /* Fixed width */
@@ -145,8 +149,15 @@
         </div>
 
     <!-- Responsive YouTube Video -->
-    <div class="video-container my-4">
-      <iframe src="https://youtu.be/P9JCKufELWs?si=zI-hvV6XiMLZKjWb" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="video-container">
+      <iframe
+        src="https://www.youtube.com/embed/P9JCKufELWs?si=zI-hvV6XiMLZKjWb"
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
     </div>
   </section>
 
