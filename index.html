@@ -119,7 +119,84 @@
   src="https://www.facebook.com/tr?id=1097645271437998&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Meta Pixel Code -->
-   
+  <style>
+
+/* Section styling */
+.photo-section {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.photo-container {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden;
+}
+
+.photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the entire container */
+    display: block;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+.title {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.cta-button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #ff6f61;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #ff3b2f;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+    }
+
+    .cta-button {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -716,19 +793,39 @@
                   </div>
                 </div>
               </div>
-              <div class="text-center">
+              <!-- <div class="text-center">
                 <div class="btn_block">
                   <a href="#pricing_container" class="btn puprple_btn ml-0">BUY NOW</a>
                   <div clTailorass="btn_bottom"></div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </section>
 <!-- AGENDA Section End -->  
 
+<!-- <div class="photo-container">
+  <img class="photo" src="https://lan27nbio8.ufs.sh/f/0dhEbmpq2JyrfOUZrlSfaZs9k1BGAER6heW3XxJ4nmPLoOlw" alt="Large Horizontal Photo">  <div class="overlay">
+      <div class="title">Frankfurt Bachata Marathon 2025</div>
+                      <div class="btn_block description">
+                  <a href="#pricing_container" class="btn puprple_btn ml-0">BUY NOW</a>
+                  <div clTailorass="btn_bottom"></div>
+  </div>
+</div> -->
 
-
+<section class="photo-section">
+  <div class="photo-container">
+      <img src="https://lan27nbio8.ufs.sh/f/0dhEbmpq2JyrfOUZrlSfaZs9k1BGAER6heW3XxJ4nmPLoOlw" alt="frankfurt bachata marathon 2025 line up" class="photo">
+      <div class="overlay">
+          <h1 class="title">Frankfurt Bachata Marathon 2025</h1>
+          <p class="subtitle">Bachata All Day All Night.</p>
+          <div class="btn_block description">
+            <a href="#pricing_container" class="btn puprple_btn ml-0">BUY NOW</a>
+            <div clTailorass="btn_bottom"></div>
+          </div>
+      </div>
+  </div>
+</section>
 
 
 <!-- PROGRAM FOTOS-Section start -->
