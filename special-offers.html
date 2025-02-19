@@ -81,6 +81,9 @@
       object-fit: cover; /* Ensures the image covers the area without distortion */
       margin: 0 auto; /* Centers the image */
     }
+    .hidden {
+    display: none;
+}
   </style>
 </head>
 <body>
@@ -176,15 +179,18 @@
       <div class="mb-3">
         <p for="pass-type" class="form-p">Type of Pass</p>
         <select class="form-select" id="pass-type" name="pass-type" required>
-          <option value="fullpass">2 Full Passes 25% Discount</option>
-          <option value="marathonpass">1 Full Pass 15% Discount</option>
-          <option value="saturdaypass">1 Marathon Pass 15% Discount</option>
+          <option value="fullpass">Full Pass</option>
+          <option value="marathonpass">Marathon Pass</option>
+          <option value="saturdaypass">Saturday Pass</option>
+          <option value="sundaypass">Sunday Pass</option>
+          <option value="partypass">Party Pass</option>
         </select>
       </div>
       <div class="mb-3">
-        <p for="category" class="form-p">Special Offer</p>
+        <p for="category" class="form-p">Category</p>
         <select class="form-select" id="category" name="category" required>
-          <option value="intermediate">Valentines</option>
+          <option value="GroupPass">Pay 4 Tickets get 1 for Free</option>
+          <option value="PerformersPass">Show Performers Pass</option>
         </select>
       </div>
       <div class="mb-3">
@@ -319,10 +325,10 @@
         var passtype = document.getElementById("pass-type").value;
         var email = document.getElementById("email").value;
 
-        let arr = [ firstname,category,passtype,email];
+        let arr = [ firstname,category,passtype,email,"Special Offer"];
 
         console.log(arr);
-        sData(arr,'https://script.google.com/macros/s/AKfycbwU8-RPJGweuNwwQOYd3kGFJVWdCWIYXPnSzN3CPBjSZVvbEJCHx8AoEArssjq9IhU/exec');
+        sData(arr,'https://script.google.com/macros/s/AKfycbwkCUjSgmbJ15kNTXuRleFACf1Giyv3D5zl0IulQqFNHDfMqfdzKv60y8XTwfdAYMs/exec');
 
         document.getElementById("name").disabled = true;
         document.getElementById("category").disabled = true;
