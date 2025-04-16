@@ -145,6 +145,7 @@
             <option value="">Select Category</option>
             <option value="Leader">Leader</option>
             <option value="Follower">Follower</option>
+            <option value="Couple">Couple</option>
           </select>
         </div>
         <div>
@@ -175,7 +176,7 @@
       const maxParticipants = 24;
       
       // URL of your published Google Apps Script web app
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEGGgsIuPLmDc9ERdAsMD41P23WumXwiob65dmNViwGSD4i8UgNV7WGffY2n6dBo4/exec';
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyA5VAiNi4llnsTW5rNuwZusIHbBl7frRx72m8Q7fYvGJS2Ig4Les8_Y6govHLCN4Y/exec';
       
       document.addEventListener('DOMContentLoaded', function() {
         addParticipant();
@@ -286,7 +287,7 @@
     if (!document.getElementById(`participant-${i}`)) continue;
     
     scores.push({
-      coupleNumber: document.getElementById(`coupleNumber-${i}`).value,
+      coupleNumber: category+' '+document.getElementById(`coupleNumber-${i}`).value,
       creativity: document.getElementById(`creativity-${i}`).value,
       expression: document.getElementById(`expression-${i}`).value,
       connection: document.getElementById(`connection-${i}`).value,
@@ -316,7 +317,15 @@
     
     if (result.success) {
       showMessage(result.message, "success");
-      // Optional: Reset form after successful submission
+      // reset the form
+        document.getElementById('judgeName').value = '';
+        document.getElementById('category').value = '';
+        document.getElementById('round').value = '';
+        const container = document.getElementById('participantsContainer');
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+      
     } else {
       showMessage("Error: " + result.message, "error");
     }
