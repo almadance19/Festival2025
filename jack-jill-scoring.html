@@ -111,6 +111,20 @@
     .submit-btn:hover {
       background-color: #2980b9;
     }
+    .delete-btn {
+      background-color: #ae0023;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .delete-btn:hover {
+      background-color: #ae0023;
+    }
     #message {
       margin-top: 15px;
       text-align: center;
@@ -264,6 +278,11 @@
       
       <div id="message"></div>
     </div>
+    <div id="delete_responses">
+      <h2>Delete Responses</h2>
+      <p>Click the button below to delete your previous scoring for the selected Category and Round.</p>
+      <button class="delete-btn" onclick="deleteAllResponses()">Delete All Responses</button>
+    </div>
   
     <script>
       let participantCount = 0;
@@ -347,6 +366,36 @@
         
         cards.forEach(card => container.appendChild(card));
       }
+
+      function deleteAllResponses() {
+  const category = document.getElementById('category').value;
+  const round = document.getElementById('round').value;
+  const judgeName = document.getElementById('judgeName').value;
+  const keyToDelete = judgeName + category + round;
+
+  if (!category || !round || !judgeName) {
+    alert("Please fill all judge information fields before deleting responses.");
+    return;
+  }
+
+  // Build URL with GET parameters
+  const url = new URL('https://script.google.com/macros/s/AKfycbwE9aO-6Slxrftf8UvchSyMvtm8ynLikwtNr30lrHjgzypvBm4N2mVMzs0lnX0dB0A/exec');
+  url.searchParams.append('keytodelete', keyToDelete);
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+      } else {
+        alert("Error deleting responses: " + data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Failed to delete responses: " + error.message);
+    });
+}
       
       function addParticipant() {
         if (participantCount >= maxParticipants) {
@@ -371,24 +420,24 @@
             <input type="text" id="coupleNumber-${participantCount}" value="${participantCount}" required>
           </div>
           <div>
-            <label>Creativity (1-10):</label>
-            <input type="number" id="creativity-${participantCount}" class="score-input" min="1" max="10" required onchange="calculateTotal(${participantCount})">
+            <label>Creativity (1-5):</label>
+            <input type="number" id="creativity-${participantCount}" class="score-input" min="1" max="5" required onchange="calculateTotal(${participantCount})">
           </div>
           <div>
-            <label>Expression (1-10):</label>
-            <input type="number" id="expression-${participantCount}" class="score-input" min="1" max="10" required onchange="calculateTotal(${participantCount})">
+            <label>Expression (1-5):</label>
+            <input type="number" id="expression-${participantCount}" class="score-input" min="1" max="5" required onchange="calculateTotal(${participantCount})">
           </div>
           <div>
-            <label>Connection (1-10):</label>
-            <input type="number" id="connection-${participantCount}" class="score-input" min="1" max="10" required onchange="calculateTotal(${participantCount})">
+            <label>Connection (1-5):</label>
+            <input type="number" id="connection-${participantCount}" class="score-input" min="1" max="5" required onchange="calculateTotal(${participantCount})">
           </div>
           <div>
-            <label>Musicality (1-10):</label>
-            <input type="number" id="musicality-${participantCount}" class="score-input" min="1" max="10" required onchange="calculateTotal(${participantCount})">
+            <label>Musicality (1-5):</label>
+            <input type="number" id="musicality-${participantCount}" class="score-input" min="1" max="5" required onchange="calculateTotal(${participantCount})">
           </div>
           <div>
-            <label>Technique (1-10):</label>
-            <input type="number" id="technique-${participantCount}" class="score-input" min="1" max="10" required onchange="calculateTotal(${participantCount})">
+            <label>Technique (1-5):</label>
+            <input type="number" id="technique-${participantCount}" class="score-input" min="1" max="5" required onchange="calculateTotal(${participantCount})">
           </div>
           <div class="participant-total">
             Total: <span id="total-${participantCount}">0</span>
