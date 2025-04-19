@@ -306,6 +306,7 @@
                     <tr>
                         <th>Rank</th>
                         <th>Participant</th>
+                        <th>Participant Name</th>
                         <th>Category</th>
                         <th>Round</th>
                         <th>Total</th>
@@ -336,7 +337,7 @@
 
         function getData() {
             // Replace with your Google Apps Script web app URL
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbxoVaMof8AOyyAkPCLsOCiV63Rq5R8U8GfXH0qzfIYTRKJ73gp1dPArsTXOyDp8VCY/exec';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbz66DU6yUCCJXXrzR9RVdOt8lJ4DPWosScchU60Sj-pp9rB8ouxU4A72HhXDR2xmR0/exec';
             
             fetch(scriptUrl)
                 .then(response => {
@@ -421,6 +422,7 @@
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${participant.participant}</td>
+                    <td>${participant.participantName}</td>
                     <td>${participant.category}</td>
                     <td>${participant.round}</td>
                     <td><span class="total-score">${participant.total}</span></td>
