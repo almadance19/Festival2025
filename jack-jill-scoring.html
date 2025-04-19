@@ -273,6 +273,9 @@
       <div class="participant-container" id="participantsContainer">
         <!-- Participant cards will be added here -->
       </div>
+      <button class="order-participant" onclick="sortParticipants()">Sort Participants by Total Score</button>
+      <button class="order-participant" onclick="sortParticipantsByNumber()">Sort Participants by Number</button>
+      
       
       <button class="submit-btn" onclick="submitAllScores()">Submit All Scores</button>
       
@@ -291,7 +294,6 @@
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyA5VAiNi4llnsTW5rNuwZusIHbBl7frRx72m8Q7fYvGJS2Ig4Les8_Y6govHLCN4Y/exec';
       
       document.addEventListener('DOMContentLoaded', function() {
-        checkPassword();
       });
 
       async function checkPassword() {
