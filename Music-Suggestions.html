@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Party Song Requests</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      color: black;
+    }
+    h1 {
+      text-align: center;
+      border-bottom: 2px solid black;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .form-section, .songs-section {
+      border: 2px solid black;
+      padding: 20px;
+      background-color: white;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid black;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: black;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #333;
+    }
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    #songsList {
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: black;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .timestamp {
+      font-size: 0.9em;
+      color: #666;
+    }
+    .status-message {
+      margin: 10px 0;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .success {
+      background-color: #e6ffe6;
+      border: 1px solid #a3e8a3;
+    }
+    .error {
+      background-color: #ffebeb;
+      border: 1px solid #ffb3b3;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .form-section, .songs-section {
+        padding: 15px;
+      }
+      th, td {
+        padding: 8px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 Party Song Requests 🎵</h1>
+  
+  <div class="container">
+    <div class="form-section">
+      <h2>Request a Song</h2>
+      <form id="songForm">
+        <div class="form-group">
+          <label for="songName">Song Title:</label>
+          <input type="text" id="songName" name="songName" required>
+        </div>
+        <div class="form-group">
+          <label for="songAuthor">Artist/Band:</label>
+          <input type="text" id="songAuthor" name="songAuthor" required>
+        </div>
+        <button type="submit" id="submitBtn">Submit Request</button>
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+      </form>
+    </div>
+    
+    <div class="songs-section">
+      <h2>Requested Songs</h2>
+      <div id="refreshControls">
+        <button id="refreshBtn">Refresh List</button>
+        <div>Last updated: <span id="lastUpdated">Never</span></div>
+      </div>
+      <div id="songsList">
+        <p>Loading song requests...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Replace with your Google Apps Script Web App URL
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_bIXO9OCDG8Zj08sT42YuEcC_hwbb1CC8w67wSjDaM4vkZbiIw1NlrVkR8un3p3rk/exec';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load songs when page loads
+      fetchSongs();
+      
+      // Handle form submission
+      document.getElementById('songForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        statusMessage.textContent = 'Submitting your request...';
+        statusMessage.className = 'status-message';
+        statusMessage.style.display = 'block';
+        
+        try {
+          const formData = {
+            songName: form.songName.value,
+            songAuthor: form.songAuthor.value
+          };
+          
+          // Send to Google Sheets via Google Apps Script
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(formData)
+          });
+          
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            // Show success message
+            statusMessage.textContent = 'Success! Your song has been added to the playlist.';
+            statusMessage.className = 'status-message success';
+            
+            // Clear form
+            form.reset();
+            
+            // Refresh the song list
+            await fetchSongs();
+          } else {
+            throw new Error(result.message || 'Failed to submit song');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          statusMessage.textContent = 'Error: ' + error.message;
+          statusMessage.className = 'status-message error';
+        } finally {
+          submitBtn.disabled = false;
+          
+          // Hide status message after 5 seconds
+          setTimeout(() => {
+            statusMessage.style.display = 'none';
+          }, 5000);
+        }
+      });
+      
+      // Refresh button handler
+      document.getElementById('refreshBtn').addEventListener('click', fetchSongs);
+    });
+    
+    async function fetchSongs() {
+      const songsList = document.getElementById('songsList');
+      const lastUpdated = document.getElementById('lastUpdated');
+      
+      try {
+        songsList.innerHTML = '<p>Loading song requests...</p>';
+        
+        const response = await fetch(`${SCRIPT_URL}?getSongs=true`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load songs');
+        }
+        
+        const songs = await response.json();
+        
+        if (!Array.isArray(songs)) {
+          throw new Error('Invalid data received');
+        }
+        
+        if (songs.length === 0) {
+          songsList.innerHTML = '<p>No songs have been requested yet. Be the first!</p>';
+          return;
+        }
+        
+        // Update last updated time
+        lastUpdated.textContent = new Date().toLocaleTimeString();
+        
+        // Generate HTML table
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Song Title</th>
+                <th>Artist</th>
+                <th>Requested At</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        // Show newest songs first
+        songs.reverse().forEach(song => {
+          html += `
+            <tr>
+              <td>${song.songName || 'Unknown'}</td>
+              <td>${song.author || 'Unknown'}</td>
+              <td><span class="timestamp">${new Date(song.timestamp).toLocaleString()}</span></td>
+            </tr>
+          `;
+        });
+        
+        html += `
+            </tbody>
+          </table>
+          <p>Total requests: ${songs.length}</p>
+        `;
+        
+        songsList.innerHTML = html;
+      } catch (error) {
+        console.error('Error fetching songs:', error);
+        songsList.innerHTML = `
+          <p class="error">Error loading songs: ${error.message}</p>
+          <button onclick="fetchSongs()">Try Again</button>
+        `;
+      }
+    }
+    
+    // Auto-refresh every 30 seconds
+    setInterval(fetchSongs, 30000);
+  </script>
+</body>
+</html>

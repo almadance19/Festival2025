@@ -6,8 +6,8 @@ const cookieItem = 'CookiesPolicy'
 //let consent_type = localStorage.getItem("CookiesPolicy")
 
 let consent_type = getCookie(cookieItem);
-let consent = getCookie(storageItem);
-
+//let consent = getCookie(storageItem);
+let consent = 'true'; //localStorage.getItem(storageItem) || getCookie(storageItem) || false;
 
 if (consent == 'true') { 
 
