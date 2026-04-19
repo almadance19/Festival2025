@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Dance Comp | Category + Score (1-10)</title>
+  <title>Dance Comp | Category + Single Score (1-100)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -19,6 +19,7 @@
       max-width: 1400px;
       margin: 0 auto;
     }
+    /* cards & panels */
     .form-panel {
       background: white;
       border-radius: 32px;
@@ -187,7 +188,7 @@
       border: 1.5px solid #e2e8f0;
       font-weight: 600;
       text-align: center;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       background: #fefcf9;
     }
     .total-score {
@@ -258,68 +259,12 @@
     }
     .dialog-confirm { background: #f97316; color: white; }
     .dialog-cancel { background: #e2e8f0; color: #1e293b; }
-    .lock-screen {
-      position: fixed;
-      top:0; left:0;
-      width:100%; height:100%;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      flex-direction: column;
-      gap: 24px;
-    }
-    .lock-card {
-      background: white;
-      border-radius: 48px;
-      padding: 32px 28px;
-      text-align: center;
-      max-width: 360px;
-      width: 85%;
-      box-shadow: 0 30px 40px rgba(0,0,0,0.3);
-    }
-    .lock-card h2 {
-      margin: 0 0 12px 0;
-      color: #1e293b;
-    }
-    .lock-card p {
-      color: #475569;
-      margin-bottom: 24px;
-    }
-    .lock-input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 60px;
-      border: 2px solid #e2e8f0;
-      font-size: 1rem;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .lock-btn {
-      background: #f97316;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 60px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      font-size: 1rem;
-    }
-    .lock-btn:hover { background: #ea580c; }
-    .error-msg {
-      color: #dc2626;
-      font-size: 0.8rem;
-      margin-top: 12px;
-    }
   </style>
 </head>
 <body>
-<div class="app-container" id="mainApp" style="display: none;">
+<div class="app-container">
   <div class="form-panel">
-    <h1>💃 DANCE MARATHON • 1-10 SCORING</h1>
+    <h1>💃 DANCE MARATHON • CATEGORY + SINGLE SCORE</h1>
     <div class="sub">✨ Leader · Follower · Couple | One holistic score from 1 to 10 ✨</div>
     
     <div class="judge-grid">
@@ -356,75 +301,50 @@
     </div>
   </div>
 
+  <!-- dynamic participants grid -->
   <div id="participantsContainer" class="participant-grid"></div>
 
   <div class="form-panel" style="margin-top: 0;">
-    <button class="btn btn-primary" id="submitAllBtn" style="width:100%; padding: 14px; font-size: 1rem;">✅ SUBMIT ALL SCORES (1-10)</button>
+    <button class="btn btn-primary" id="submitAllBtn" style="width:100%; padding: 14px; font-size: 1rem;">✅ SUBMIT ALL SCORES (Category + Round)</button>
     <div id="message" class="message-area"></div>
   </div>
-  <footer>🎯 Single performance score: 1 (lowest) – 10 (perfect) • Category required • One-time password at start</footer>
+  <footer>🎯 Single performance score: 1 (lowest) – 100 (perfect) • Category required • Password protected</footer>
 </div>
 
 <script>
   // --------------------------------------------------------------
   // CONFIGURATION
   // --------------------------------------------------------------
+  // 🔐 Hardcoded password (direct JS check as requested)
   const VALID_PASSWORD = "Marathon26";
+  
+  // Google Apps Script endpoints (keep original structure but now includes category)
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFSWtfxIyvELq2saOeqw9f2i_o942M5AWAxiUUgJd_8YKIroPK4JkUJNXPUCKYNxk/exec';
   const DELETE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwE9aO-6Slxrftf8UvchSyMvtm8ynLikwtNr30lrHjgzypvBm4N2mVMzs0lnX0dB0A/exec';
   
   // Global state
   let participantCount = 0;
   const MAX_PARTICIPANTS = 28;
-  let isPasswordVerified = false;   // one-time flag
 
-  // ---------- PASSWORD GATE (ONCE, AT PAGE LOAD) ----------
-  function showPasswordModal() {
-    return new Promise((resolve) => {
-      // create lock screen overlay
-      const lockDiv = document.createElement('div');
-      lockDiv.className = 'lock-screen';
-      lockDiv.id = 'lockScreen';
-      lockDiv.innerHTML = `
-        <div class="lock-card">
-          <h2>🔐 Competition Access</h2>
-          <p>Enter password to continue</p>
-          <input  id="passwordInput" placeholder="Password" autocomplete="off">
-          <button id="submitPasswordBtn" class="lock-btn">Unlock</button>
-          <div id="lockError" class="error-msg"></div>
-        </div>
-      `;
-      document.body.appendChild(lockDiv);
-      
-      const inputField = document.getElementById('passwordInput');
-      const submitBtn = document.getElementById('submitPasswordBtn');
-      const errorSpan = document.getElementById('lockError');
-      
-      const attemptUnlock = () => {
-        const entered = inputField.value.trim();
-        if (entered === VALID_PASSWORD) {
-          // correct: remove lock, resolve true
-          lockDiv.remove();
-          resolve(true);
-        } else {
-          errorSpan.textContent = '❌ Incorrect password. Access denied.';
-          inputField.value = '';
-          inputField.focus();
-        }
-      };
-      
-      submitBtn.addEventListener('click', attemptUnlock);
-      inputField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') attemptUnlock();
-      });
-      inputField.focus();
-    });
+  // ---------- PASSWORD GATE (direct JS, no external fetch) ----------
+  function isPasswordValid() {
+    const entered = prompt("🔐 COMPETITION ACCESS • Enter password:");
+    if (entered === VALID_PASSWORD) {
+      return true;
+    } else {
+      alert("❌ Incorrect password. Access denied.");
+      return false;
+    }
+  }
+
+  // Enforce at critical actions: submit & delete, plus initial load
+  function enforcePasswordGate() {
+    return isPasswordValid();
   }
 
   // ---------- UI Helpers ----------
   function showMessage(text, type) {
     const msgDiv = document.getElementById('message');
-    if (!msgDiv) return;
     msgDiv.textContent = text;
     msgDiv.className = `message-area ${type}`;
     setTimeout(() => {
@@ -433,22 +353,22 @@
     }, 4200);
   }
 
-  // update total display (now 1-10 scale)
+  // update total display (single score 1-100)
   function updateTotalDisplay(participantId) {
     const scoreField = document.getElementById(`overallScore-${participantId}`);
     if (!scoreField) return;
     let raw = parseInt(scoreField.value, 10);
-    if (isNaN(raw)) raw = 1;
-    let clamped = Math.min(10, Math.max(1, raw));
+    if (isNaN(raw)) raw = 0;
+    let clamped = Math.min(100, Math.max(1, raw));
     if (raw !== clamped && raw !== 0) {
       scoreField.value = clamped;
     }
-    if (clamped < 1) clamped = 1;
+    if (clamped < 1 && raw === 0) clamped = 0;
     const totalSpan = document.getElementById(`totalVal-${participantId}`);
-    if (totalSpan) totalSpan.innerText = clamped;
+    if (totalSpan) totalSpan.innerText = clamped > 0 ? clamped : 0;
   }
 
-  // Add a new dancer card (score 1-10)
+  // Add a new dancer card (single 1-100 score)
   function addParticipant(forcedNumber = null) {
     if (participantCount >= MAX_PARTICIPANTS) {
       alert(`Maximum ${MAX_PARTICIPANTS} participants allowed.`);
@@ -467,12 +387,12 @@
         <button class="remove-icon" data-id="${uid}" aria-label="remove">✕</button>
       </div>
       <div class="score-row">
-        <label>⭐ PERFORMANCE SCORE (1 - 10)</label>
+        <label>⭐ PERFORMANCE SCORE (1 - 100)</label>
         <input type="number" id="overallScore-${uid}" class="score-input-large" 
-               min="1" max="10" value="8" step="1" placeholder="1–10">
+               min="1" max="100" value="78" step="1" placeholder="1–100">
       </div>
       <div class="total-score">
-        🏆 TOTAL: <span id="totalVal-${uid}">8</span> pts
+        🏆 TOTAL: <span id="totalVal-${uid}">78</span> pts
       </div>
     `;
     container.appendChild(card);
@@ -515,7 +435,6 @@
         if (inputElem) {
           const newInput = document.getElementById(`overallScore-${newSeq}`);
           if (newInput) {
-            // rebind event
             const oldListener = () => updateTotalDisplay(newSeq);
             newInput.removeEventListener('input', oldListener);
             newInput.addEventListener('input', () => updateTotalDisplay(newSeq));
@@ -551,7 +470,7 @@
       return bScore - aScore;
     });
     cards.forEach(card => container.appendChild(card));
-    showMessage("Sorted by highest score (1-10)", "info");
+    showMessage("Sorted by highest score", "info");
   }
 
   function sortByNumber() {
@@ -566,8 +485,10 @@
     showMessage("Sorted by dancer number", "info");
   }
 
-  // ---------------- DELETE SCORES (using category & round) ----------------
+  // ---------------- DELETE SCORES (respect category & round) ----------------
   async function deleteMyScores() {
+    //if (!isPasswordValid()) return;
+    
     const judgeName = document.getElementById('judgeName').value.trim();
     const category = document.getElementById('category').value;
     const round = document.getElementById('round').value;
@@ -595,8 +516,11 @@
     }
   }
 
-  // ---------------- SUBMIT (Category + Single score 1-10) ----------------
+  // ---------------- SUBMIT (Category + Single score 1-100) ----------------
   async function submitAllScores() {
+    // 1) PASSWORD
+    //if (!isPasswordValid()) return;
+    
     const judgeName = document.getElementById('judgeName').value.trim();
     const category = document.getElementById('category').value;
     const round = document.getElementById('round').value;
@@ -606,7 +530,7 @@
       return;
     }
     
-    // Gather participants scores (1-10 validation)
+    // Gather participants scores
     const dancers = [];
     let valid = true;
     for (let i = 1; i <= participantCount; i++) {
@@ -615,8 +539,8 @@
       const scoreInput = document.getElementById(`overallScore-${i}`);
       let scoreVal = parseInt(scoreInput?.value, 10);
       if (isNaN(scoreVal)) scoreVal = 0;
-      if (scoreVal < 1 || scoreVal > 10) {
-        showMessage(`❌ Dancer #${i} has invalid score (${scoreVal}). Must be between 1 and 10.`, "error");
+      if (scoreVal < 1 || scoreVal > 100) {
+        showMessage(`❌ Dancer #${i} has invalid score (${scoreVal}). Must be between 1 and 100.`, "error");
         document.getElementById(`pCard-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         valid = false;
         break;
@@ -640,7 +564,8 @@
       return;
     }
     
-    // Build payload: backend expects sub-criteria fields but we map single score to totalScore
+    // Build payload for backend: backend expects 'creativity, expression, connection, musicality, technique'
+    // but we will map the single overall score to totalScore and fill zeros for sub-scores.
     const scoresPayload = dancers.map(d => ({
       coupleNumber: d.coupleNumber,
       creativity: 0,
@@ -648,7 +573,7 @@
       connection: 0,
       musicality: 0,
       technique: 0,
-      totalScore: d.overallScore   // 1-10 score now
+      totalScore: d.overallScore
     }));
     
     const params = new URLSearchParams();
@@ -657,7 +582,7 @@
     params.append('round', round);
     params.append('scores', JSON.stringify(scoresPayload));
 
-    console.log("Submitting payload (1-10 scale):", {
+    console.log("Submitting payload:", {
       judgeName,
       category,
       round,
@@ -672,16 +597,13 @@
       });
       const result = await response.json();
       if (result.success) {
-        showMessage(`🎉 Success! ${dancers.length} scores (1-10) saved for ${judgeName} (${category} - ${round}).`, "success");
-        // optional: clear judge name & round, keep category for convenience
+        showMessage(`🎉 Success! ${dancers.length} scores saved for ${judgeName} (${category} - ${round}).`, "success");
+        // Optional: keep form data but not mandatory to reset participants
+        // We reset only judge & round? Keep category? Many judges prefer keep.
         document.getElementById('judgeName').value = '';
         document.getElementById('round').value = '';
+        // category stays selected for convenience? we keep as is.
         showMessage("Ready for next judge or next round.", "info");
-        // ALERT SUCCESSFUL SUBMISSION
-        alert(`✅ Scores submitted successfully for ${judgeName}!\n\nCategory: ${category}\nRound: ${round}\nDancers scored: ${dancers.length}`);
-        //start page again
-        location.reload();
-        
       } else {
         showMessage("Server error: " + (result.message || "unknown"), "error");
       }
@@ -699,7 +621,7 @@
           <h3>📋 Confirm submission</h3>
           <p>You are about to submit <strong>${numDancers}</strong> dancer(s).</p>
           <p><strong>Category:</strong> ${category} &nbsp;|&nbsp; <strong>Round:</strong> ${round}</p>
-          <p><strong>Score range: 1–10</strong> (single performance score).</p>
+          <p>Score range: 1–100 (single performance score).</p>
           <div class="dialog-buttons">
             <button class="dialog-btn dialog-cancel" id="dialogCancelBtn">Cancel</button>
             <button class="dialog-btn dialog-confirm" id="dialogConfirmBtn">Confirm Submit</button>
@@ -721,26 +643,18 @@
     });
   }
 
-  // ---------- FULL INIT: PASSWORD ONCE THEN LOAD UI ----------
-  async function bootstrapApp() {
-    // ONE-TIME password check at page opening
-    const passwordGranted = await showPasswordModal();
-    if (!passwordGranted) {
-      // fallback: if somehow false (user closed but not possible) show block
+  // ---------- INITIALIZATION with PASSWORD PROTECTION ----------
+  function initApp() {
+    const access = isPasswordValid();
+    if (!access) {
       document.body.innerHTML = `<div style="text-align:center; margin-top: 80px; font-family: sans-serif; padding: 20px;">
         <h2>🔒 Access Restricted</h2>
-        <p>Password required to use this scoring system.</p>
+        <p>Invalid or missing password. Reload the page to try again.</p>
         <button onclick="location.reload()" style="margin-top:20px; padding:10px 24px; border-radius:40px; background:#f97316; border:none; color:white; font-weight:bold;">Reload Page</button>
         </div>`;
       return;
     }
-    
-    isPasswordVerified = true;
-    // show main app container
-    const mainDiv = document.getElementById('mainApp');
-    if (mainDiv) mainDiv.style.display = 'block';
-    
-    // initialize default participants (3 dancers)
+    // default 3 participants
     for (let i = 0; i < 3; i++) addParticipant();
     
     // attach event listeners
@@ -752,9 +666,11 @@
     document.getElementById('submitAllBtn').addEventListener('click', submitAllScores);
   }
   
-  // start: hide main initially, run password gate
-  document.getElementById('mainApp').style.display = 'none';
-  bootstrapApp();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
 </script>
 </body>
 </html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dance Competition Results</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --highlight-color: #fffacd;
+            --first-place: #f1c40f;
+            --second-place: #95a5a6;
+            --third-place: #e67e22;
+            --text-color: #333;
+            --light-gray: #f5f7fa;
+            --medium-gray: #ddd;
+            --dark-gray: #7f8c8d;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1 1 150px;
+        }
+        
+        .results-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        .results-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .results-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--medium-gray);
+            font-size: 14px;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .results-table tr:hover {
+            background-color: #e8f4fc;
+        }
+        
+        .category-score {
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .total-score {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .judge-list {
+            font-size: 12px;
+            color: var(--dark-gray);
+            white-space: nowrap;
+        }
+        
+        .highlight {
+            background-color: var(--highlight-color);
+        }
+        
+        .podium {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .podium-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 100px;
+            max-width: 150px;
+        }
+        
+        .podium-place {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            padding: 8px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .first {
+            background-color: var(--first-place);
+            height: 120px;
+            order: 2;
+        }
+        
+        .second {
+            background-color: var(--second-place);
+            height: 90px;
+            order: 1;
+        }
+        
+        .third {
+            background-color: var(--third-place);
+            height: 60px;
+            order: 3;
+        }
+        
+        .participant-name {
+            margin-top: 5px;
+            font-weight: bold;
+            text-align: center;
+            word-break: break-word;
+        }
+        
+        .podium-points {
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: var(--dark-gray);
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #e74c3c;
+        }
+        
+        .refresh-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .refresh-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--dark-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .filters {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            select, input {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+            
+            .podium {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .podium-step {
+                flex-direction: row;
+                align-items: center;
+                min-width: 80%;
+                max-width: 90%;
+                gap: 15px;
+                padding: 5px;
+                background-color: #f8f9fa;
+                border-radius: 5px;
+            }
+            
+            .podium-place {
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+            
+            .first, .second, .third {
+                height: 50px;
+            }
+            
+            .podium-info {
+                flex-grow: 1;
+                text-align: left;
+            }
+            
+            .participant-name {
+                margin-top: 0;
+                text-align: left;
+            }
+            
+            .podium-points {
+                text-align: left;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .results-table th, 
+            .results-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            .category-score {
+                width: 35px;
+            }
+            
+            .podium-step {
+                min-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <h1>🏆 Dance Competition Results</h1>
+        
+        <div class="filters">
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+            </select>
+            
+            <select id="roundFilter">
+                <option value="">All Rounds</option>
+            </select>
+            
+            <input type="text" id="searchInput" placeholder="Search participant number...">
+        </div>
+        
+        <div id="podium" class="podium"></div>
+        
+        <div class="results-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Number</th>
+                        <th>Category</th>
+                        <th>Round</th>
+                        <th>Total Score</th>
+                        <th title="Creativity">Creat.</th>
+                        <th title="Expression">Expr.</th>
+                        <th title="Connection">Conn.</th>
+                        <th title="Musicality">Music.</th>
+                        <th title="Technique">Tech.</th>
+                        <th>Judges</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr><td colspan="11" class="loading">Loading results...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <button class="refresh-btn" onclick="getData()">🔄 Refresh Results</button>
+        <div class="stats" id="stats"></div>
+    </div>
+
+    <script>
+        let resultsData = [];
+
+        window.addEventListener('DOMContentLoaded', getData);
+
+        function getData() {
+            // IMPORTANT: Replace with your Google Apps Script Web App URL
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwCfWwlukqn5MCeENOJBosO2YGMXsszriloF06htHEIcyE1c9bBYSMydcmD9MxoNzCs/exec';
+            
+            document.getElementById('resultsBody').innerHTML = '<tr><td colspan="11" class="loading">Loading results...</td></tr>';
+            
+            fetch(scriptUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.data) {
+                        resultsData = data.data;
+                        initFilters();
+                        renderResults();
+                        document.getElementById('stats').innerHTML = `📊 ${resultsData.length} entries • Sorted by Total Score`;
+                    } else {
+                        throw new Error(data.error || 'Data format error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('resultsBody').innerHTML = `<tr><td colspan="11" class="error">Error loading data: ${error.message}<br><br>Make sure the Google Apps Script is deployed and the URL is correct.</td></tr>`;
+                });
+        }
+
+        function initFilters() {
+            const categories = [...new Set(resultsData.map(item => item.category))];
+            const rounds = [...new Set(resultsData.map(item => item.round))];
+            
+            const categoryFilter = document.getElementById('categoryFilter');
+            const roundFilter = document.getElementById('roundFilter');
+            
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            roundFilter.innerHTML = '<option value="">All Rounds</option>';
+            
+            categories.forEach(category => {
+                if (category) {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilter.appendChild(option);
+                }
+            });
+            
+            rounds.forEach(round => {
+                if (round) {
+                    const option = document.createElement('option');
+                    option.value = round;
+                    option.textContent = round;
+                    roundFilter.appendChild(option);
+                }
+            });
+            
+            categoryFilter.addEventListener('change', filterResults);
+            roundFilter.addEventListener('change', filterResults);
+            document.getElementById('searchInput').addEventListener('input', filterResults);
+        }
+
+        function renderResults(filteredData = resultsData) {
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (filteredData.length === 0) {
+                resultsBody.innerHTML = '<tr><td colspan="11" class="loading">No results match your filters</td></tr>';
+                document.getElementById('podium').innerHTML = '';
+                return;
+            }
+            
+            // Render podium
+            const podiumData = [...filteredData].slice(0, 3);
+            renderPodium(podiumData);
+            
+            // Render table rows
+            filteredData.forEach((participant, index) => {
+                const row = document.createElement('tr');
+                
+                if (index < 3) {
+                    row.classList.add('highlight');
+                }
+                
+                row.innerHTML = `
+                    <td><strong>${index + 1}</strong></td>
+                    <td><strong>${escapeHtml(participant.participant)}</strong></td>
+                    <td>${escapeHtml(participant.category)}</td>
+                    <td>${escapeHtml(participant.round)}</td>
+                    <td><span class="total-score">${participant.total}</span></td>
+                    <td class="category-score">${participant.creativity}</td>
+                    <td class="category-score">${participant.expression}</td>
+                    <td class="category-score">${participant.connection}</td>
+                    <td class="category-score">${participant.musicality}</td>
+                    <td class="category-score">${participant.technique}</td>
+                    <td class="judge-list">${participant.judges.length} judge(s)</td>
+                `;
+                
+                resultsBody.appendChild(row);
+            });
+        }
+
+        function renderPodium(topThree) {
+            const podium = document.getElementById('podium');
+            podium.innerHTML = '';
+            
+            if (topThree.length === 0) return;
+            
+            if (window.innerWidth <= 768) {
+                // Mobile layout
+                topThree.forEach((participant, index) => {
+                    const placeClass = index === 0 ? 'first' : index === 1 ? 'second' : 'third';
+                    const placeNumber = index + 1;
+                    const medal = placeNumber === 1 ? '🥇' : placeNumber === 2 ? '🥈' : '🥉';
+                    
+                    const podiumStep = document.createElement('div');
+                    podiumStep.className = 'podium-step';
+                    podiumStep.innerHTML = `
+                        <div class="podium-place ${placeClass}">${medal}</div>
+                        <div class="podium-info">
+                            <div class="participant-name">#${escapeHtml(participant.participant)}</div>
+                            <div class="podium-points">${participant.total} pts</div>
+                            <div class="podium-points" style="font-size:11px">${escapeHtml(participant.category)} • ${escapeHtml(participant.round)}</div>
+                        </div>
+                    `;
+                    podium.appendChild(podiumStep);
+                });
+            } else {
+                // Desktop layout
+                if (topThree.length > 1) {
+                    const secondPlace = document.createElement('div');
+                    secondPlace.className = 'podium-step';
+                    secondPlace.innerHTML = `
+                        <div class="podium-place second">🥈 2</div>
+                        <div class="participant-name">#${escapeHtml(topThree[1].participant)}</div>
+                        <div class="podium-points">${topThree[1].total} pts</div>
+                    `;
+                    podium.appendChild(secondPlace);
+                }
+                
+                if (topThree.length > 0) {
+                    const firstPlace = document.createElement('div');
+                    firstPlace.className = 'podium-step';
+                    firstPlace.innerHTML = `
+                        <div class="podium-place first">🥇 1</div>
+                        <div class="participant-name">#${escapeHtml(topThree[0].participant)}</div>
+                        <div class="podium-points">${topThree[0].total} pts</div>
+                    `;
+                    podium.appendChild(firstPlace);
+                }
+                
+                if (topThree.length > 2) {
+                    const thirdPlace = document.createElement('div');
+                    thirdPlace.className = 'podium-step';
+                    thirdPlace.innerHTML = `
+                        <div class="podium-place third">🥉 3</div>
+                        <div class="participant-name">#${escapeHtml(topThree[2].participant)}</div>
+                        <div class="podium-points">${topThree[2].total} pts</div>
+                    `;
+                    podium.appendChild(thirdPlace);
+                }
+            }
+        }
+
+        function filterResults() {
+            const category = document.getElementById('categoryFilter').value;
+            const round = document.getElementById('roundFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = resultsData.filter(participant => {
+                const matchesCategory = category === '' || participant.category === category;
+                const matchesRound = round === '' || participant.round === round;
+                const matchesSearch = search === '' || participant.participant.toLowerCase().includes(search);
+                return matchesCategory && matchesRound && matchesSearch;
+            });
+            
+            renderResults(filtered);
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        window.addEventListener('resize', function() {
+            if (resultsData.length > 0) {
+                const category = document.getElementById('categoryFilter').value;
+                const round = document.getElementById('roundFilter').value;
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = resultsData.filter(p => {
+                    return (category === '' || p.category === category) &&
+                           (round === '' || p.round === round) &&
+                           (search === '' || p.participant.toLowerCase().includes(search));
+                });
+                const podiumData = filtered.slice(0, 3);
+                renderPodium(podiumData);
+            }
+        });
+    </script>
+</body>
+</html>
